@@ -1,0 +1,18 @@
+name: Weekly App Refresh & yt-dlp Update
+
+on:
+  schedule:
+    # Runs automatically every single Sunday at midnight UTC
+    - crom: '0 0 * * 0'
+  workflow_dispatch: # Allows manual trigger from Github anytime
+
+
+jobs:
+  trigger-redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Latest Code to Host
+        run: |
+          # If using Render, replace with your Render Deploy Hook URL
+          # If using Railway, install Railway CLI and run 'railway up' via tokens
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
