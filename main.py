@@ -21,14 +21,14 @@ async def extract_video_info(request: VideoRequest):
     is_yt = "youtube.com" in request.url or "youtu.be" in request.url
     
     ydl_options = {
+        'format': 'bestvideo*+bestaudio/best',
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
         'cookiefile': './cookies.txt',
         'extractor_args': {
             'youtube': {
-                'player_client': ['mweb', 'web_creator', 'web_embedded', 'android'],
-                'skip': ['dash', 'hls']
+                'player_client': ['mweb', 'web_embedded', 'android', 'ios'],
             },
             'tiktok': {
                 'app_version': '20.2.1',
@@ -44,7 +44,7 @@ async def extract_video_info(request: VideoRequest):
         },
         'no_color': True,
     }
-
+    
     try:
         with yt_dlp.YoutubeDL(ydl_options) as ydl:
             info = ydl.extract_info(request.url, download=False)
