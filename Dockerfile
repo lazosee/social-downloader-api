@@ -26,6 +26,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application source code
+COPY ./cookies.txt .
 COPY . .
 
 # Expose the designated port
