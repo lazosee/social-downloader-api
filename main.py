@@ -16,6 +16,12 @@ app.add_middleware(
 class VideoRequest(BaseModel):
     url: str
 
+
+@app.get("/health")
+async def health_check():
+    return { "status": "healthy", "uptime": "active" }
+
+
 @app.post("/api/extract")
 async def extract_video_info(request: VideoRequest):
     ydl_options = {
