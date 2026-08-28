@@ -21,7 +21,6 @@ async def extract_video_info(request: VideoRequest):
     is_yt = "youtube.com" in request.url or "youtu.be" in request.url
     
     ydl_options = {
-        'format': 'best',
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
