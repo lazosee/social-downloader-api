@@ -29,8 +29,8 @@ async def extract_video_info(request: VideoRequest):
         'cookiefile': './cookies.txt',
         'extractor_args': {
             'youtube': {
-                'player_cient': ['web_embedded', 'web', 'tv'], # Bypasses iOS/Android blocks
-                'player_skip': ['webpage', 'configs'],
+                'player_cient': ['web_embedded', 'web'], # Bypasses iOS/Android blocks
+                # 'player_skip': ['webpage', 'configs'],
                 'skip': ['dash', 'hls']
             },
             'tiktok': {
