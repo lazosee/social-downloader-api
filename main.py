@@ -18,29 +18,20 @@ class VideoRequest(BaseModel):
 
 @app.post("/api/extract")
 async def extract_video_info(request: VideoRequest):
-    is_yt = "youtube.com" in request.url or "youtu.be" in request.url
-    
     ydl_options = {
-        'format': 'bestvideo*+bestaudio/best',
+        # Omit 'format' so yt-dlp returns all extracted stream metadata
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
         'cookiefile': './cookies.txt',
         'extractor_args': {
             'youtube': {
-                'player_client': ['mweb', 'web_embedded', 'android', 'ios'],
+                'player_client': ['tv_embedded', 'web_embedded', 'mweb'],
             },
             'tiktok': {
                 'app_version': '20.2.1',
                 'manifest_app_version': '20.2.1'
             }
-        },
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Sec-Fetch-Mode': 'navigate',
-            'Referer': 'https://www.youtube.com/' if is_yt else 'https://www.tiktok.com/',
         },
         'no_color': True,
     }
@@ -50,18 +41,28 @@ async def extract_video_info(request: VideoRequest):
             info = ydl.extract_info(request.url, download=False)
             
             download_url = info.get("url")
+            
+            # If a single direct URL isn't populated, find the best progressive (video+audio) format
             if not download_url and info.get("formats"):
-                formats = [
-                    f for f in info["formats"] 
-                    if f.get("vcodec") != "none" and f.get("acodec") != "none" and f.get("url")
+                # 1. Prefer formats that have BOTH video and audio in a single stream
+                progressive_formats = [
+                    f for f in info["formats"]
+                    if f.get("vcodec") != "none" 
+                    and f.get("acodec") != "none" 
+                    and f.get("url")
                 ]
-                if formats:
-                    download_url = formats[-1].get("url")
+                
+                if progressive_formats:
+                    # Sort by resolution/height/tbr if available
+                    download_url = progressive_formats[-1].get("url")
                 else:
-                    download_url = info["formats"][-1].get("url")
+                    # 2. Fallback to the highest bitrate video-only or generic stream
+                    valid_formats = [f for f in info["formats"] if f.get("url")]
+                    if valid_formats:
+                        download_url = valid_formats[-1].get("url")
 
             if not download_url:
-                raise Exception("Could not extract direct download URL")
+                raise Exception("Could not extract a direct playable URL")
 
             return {
                 "extractor": info.get("extractor_key"),
