@@ -43,7 +43,7 @@ async def extract_video_info(request: VideoRequest):
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
             'Sec-Fetch-Mode': 'navigate',
-            'Referer': 'https://www.tiktok.com/',
+            'Referer': 'https://www.youtube.com/' if (request.url.find("youtube") or request.url.find("youtu.be")) else 'https://www.tiktok.com/',
         },
         # Automatically updates cookies/sessions for tough platforms if needed
         'no_color': True,

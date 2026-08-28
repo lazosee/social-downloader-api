@@ -10,6 +10,9 @@ ENV PORT=8000
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
+    gnupg \
+    && curl -fsSL https://nodesource.com | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Establish the working directory
