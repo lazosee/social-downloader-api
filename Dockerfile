@@ -2,34 +2,34 @@
 FROM python:3.11-slim
 
 # Set System environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
 
-# Install system dependencies needed by yt-dlp (like ffmpeg if needed later)
+# Install system dependencies needed by yt-dlp & Node.js
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
     gnupg \
-    && curl -fsSL https://nodesource.com | bash - \
-    && apt-get install -y nodejs \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && apt-get purge -y --auto-remove curl gnupg \
     && rm -rf /var/lib/apt/lists/*
 
 # Establish the working directory
 WORKDIR /app
 
-# Copy and install dependencies
+# Copy and install dependencies first (layer caching)
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application files
-COPY cookies.txt .
+# Copy application source code
 COPY . .
 
 # Expose the designated port
 EXPOSE 8000
 
-# Run FastAPI using uvicorn
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT}
+# Run FastAPI using uvicorn (shell form to evaluate $PORT dynamically)
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
