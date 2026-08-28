@@ -17,6 +17,8 @@ WORKDIR /app
 
 # Copy and install dependencies
 COPY requirements.txt .
+RUN python -m venv .venv && \
+    .\.venv\Scripts\activate
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
