@@ -73,10 +73,6 @@ async def extract_video_info(request: VideoRequest):
                     if valid_formats:
                         download_url = valid_formats[-1].get("url")
 
-                if info.get("extractor_key") == "TikTok":
-                    # Route through stream proxy
-                    download_url = f"{BASE_URL}/api/stream?url={download_url}"
-
             if not download_url:
                 raise Exception("Could not extract a direct playable URL")
 
