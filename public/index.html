@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnapSave - TikTok & Reels Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      @keyframes pulse-subtle {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+      .animate-pulse-subtle {
+        animation: pulse-subtle 2s infinite ease-in-out;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-indigo-500 selection:text-white"
+  >
+    <header
+      class="w-full border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50"
+    >
+      <div
+        class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-2">
+          <div
+            class="w-8 h-8 rounded-lg bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20"
+          >
+            <i class="fa-solid fa-arrow-down"></i>
+          </div>
+          <span
+            class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent"
+            >SnapSave</span
+          >
+        </div>
+        <div
+          class="flex items-center space-x-3 text-xs text-slate-400 font-medium"
+        >
+          <span
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700"
+          >
+            <i class="fa-brands fa-tiktok text-slate-200"></i> TikTok
+          </span>
+          <span
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700"
+          >
+            <i class="fa-brands fa-instagram text-rose-400"></i> Reels
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-4">
+      <div class="w-full max-w-xl space-y-6">
+        <div class="text-center space-y-2">
+          <h1
+            class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white"
+          >
+            Download Social Clips
+          </h1>
+          <p class="text-slate-400 text-sm sm:text-base">
+            Save high-quality videos from TikTok and Instagram instantly.
+          </p>
+        </div>
+
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-xl shadow-black/40 space-y-3"
+        >
+          <form
+            id="extract-form"
+            class="flex flex-col sm:flex-row items-stretch gap-2"
+          >
+            <div class="relative flex-1">
+              <div
+                class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"
+              >
+                <i class="fa-solid fa-link text-sm"></i>
+              </div>
+              <input
+                type="url"
+                id="url-input"
+                required
+                placeholder="Paste TikTok or Instagram link..."
+                class="w-full pl-10 pr-20 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition"
+              />
+              <button
+                type="button"
+                id="paste-btn"
+                class="absolute inset-y-1.5 right-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1"
+              >
+                <i class="fa-regular fa-clipboard"></i> Paste
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              id="submit-btn"
+              class="py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <span>Fetch</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </form>
+
+          <div
+            id="platform-indicator"
+            class="hidden text-xs flex items-center gap-1.5 text-slate-400 px-1 font-medium"
+          >
+            Detected:
+            <span
+              id="platform-name"
+              class="capitalize font-semibold text-indigo-400"
+            ></span>
+          </div>
+        </div>
+
+        <div
+          id="error-card"
+          class="hidden bg-rose-950/40 border border-rose-800/60 rounded-xl p-4 text-rose-300 text-sm flex items-start gap-3"
+        >
+          <i class="fa-solid fa-circle-exclamation mt-0.5 text-rose-400"></i>
+          <div class="flex-1" id="error-message">Failed to process link.</div>
+        </div>
+
+        <div
+          id="result-card"
+          class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4"
+        >
+          <div class="flex gap-4">
+            <div
+              class="relative w-24 h-32 sm:w-28 sm:h-36 rounded-xl overflow-hidden bg-slate-950 flex-shrink-0 border border-slate-800"
+            >
+              <img
+                id="res-thumbnail"
+                src=""
+                alt="Thumbnail"
+                class="w-full h-full object-cover"
+              />
+              <div
+                id="res-duration"
+                class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/75 text-[10px] font-mono text-white"
+              >
+                0:00
+              </div>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-between py-1 min-w-0">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span
+                    id="res-badge"
+                    class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700"
+                    >Platform</span
+                  >
+                </div>
+                <h2
+                  id="res-title"
+                  class="text-sm font-semibold text-white truncate-2-lines line-clamp-2 leading-snug"
+                >
+                  Video Title
+                </h2>
+              </div>
+
+              <a
+                id="download-btn"
+                href="#"
+                target="_blank"
+                download
+                rel="noopener noreferrer"
+                class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-medium text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20"
+              >
+                <i class="fa-solid fa-download"></i>
+                <span>Download Media</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="w-full border-t border-slate-900 py-4 text-center text-xs text-slate-600"
+    >
+      Clean & fast media extractor • No watermark extraction where supported
+    </footer>
+
+    <script>
+      const API_ENDPOINT =
+        "https://social-downloader-api-6pv6.onrender.com/api/extract";
+
+      const form = document.getElementById("extract-form");
+      const urlInput = document.getElementById("url-input");
+      const pasteBtn = document.getElementById("paste-btn");
+      const submitBtn = document.getElementById("submit-btn");
+      const errorCard = document.getElementById("error-card");
+      const errorMessage = document.getElementById("error-message");
+      const resultCard = document.getElementById("result-card");
+      const platformIndicator = document.getElementById("platform-indicator");
+      const platformName = document.getElementById("platform-name");
+
+      // Clipboard Paste Listener
+      pasteBtn.addEventListener("click", async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            urlInput.value = text.trim();
+            detectPlatform(urlInput.value);
+          }
+        } catch (err) {
+          urlInput.focus();
+        }
+      });
+
+      // Detect Platform on Input
+      urlInput.addEventListener("input", () => {
+        detectPlatform(urlInput.value);
+      });
+
+      function detectPlatform(val) {
+        if (val.includes("tiktok.com")) {
+          platformIndicator.classList.remove("hidden");
+          platformName.textContent = "TikTok Video";
+        } else if (val.includes("instagram.com")) {
+          platformIndicator.classList.remove("hidden");
+          platformName.textContent = "Instagram Reel / Post";
+        } else {
+          platformIndicator.classList.add("hidden");
+        }
+      }
+
+      function formatDuration(seconds) {
+        if (!seconds) return "N/A";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+      }
+
+      // Submit Handler
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const url = urlInput.value.trim();
+        if (!url) return;
+
+        // Reset states
+        errorCard.classList.add("hidden");
+        resultCard.classList.add("hidden");
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i><span>Fetching...</span>`;
+
+        try {
+          const res = await fetch(API_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(
+              data.detail || "Failed to extract video information.",
+            );
+          }
+
+          // Populate Result Card
+          document.getElementById("res-thumbnail").src =
+            data.thumbnail ||
+            "https://placehold.co/400x600/1e293b/white?text=No+Preview";
+          document.getElementById("res-title").textContent =
+            data.title || "Extracted Social Video";
+          document.getElementById("res-duration").textContent = formatDuration(
+            data.duration,
+          );
+          document.getElementById("res-badge").textContent =
+            data.extractor || "Video";
+
+          const dlBtn = document.getElementById("download-btn");
+          dlBtn.href = data.download_url;
+          dlBtn.setAttribute("download", `video-${Date.now()}.mp4`);
+
+          resultCard.classList.remove("hidden");
+        } catch (err) {
+          errorMessage.textContent =
+            err.message ||
+            "An error occurred while contacting the extraction API.";
+          errorCard.classList.remove("hidden");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>Fetch</span><i class="fa-solid fa-arrow-right text-xs"></i>`;
+        }
+      });
+    </script>
+  </body>
+</html>

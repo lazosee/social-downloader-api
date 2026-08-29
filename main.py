@@ -1,7 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
+from urllib.parse import unquote
 import yt_dlp
+import httpx
+
+
+BASE_URL = "https://social-downloader-api-6pv6.onrender.com"
 
 app = FastAPI()
 
@@ -67,6 +73,10 @@ async def extract_video_info(request: VideoRequest):
                     if valid_formats:
                         download_url = valid_formats[-1].get("url")
 
+                if info.get("extractor_key") == "TikTok":
+                    # Route through stream proxy
+                    download_url = f"{BASE_URL}/api/stream?url={download_url}"
+
             if not download_url:
                 raise Exception("Could not extract a direct playable URL")
 
@@ -80,4 +90,27 @@ async def extract_video_info(request: VideoRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to process link: {str(e)}")
 
+
+
+@app.get("/api/stream")
+async def proxy_stream(url: str):
+    decoded_url = unquote(url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://www.tiktok.com/",
+        "Accept": "*/*",
+    }
     
+    client = httpx.AsyncClient(headers=headers, follow_redirects=True, timeout=60.0)
+    req = client.build_request("GET", decoded_url)
+    res = await client.send(req, stream=True)
+    
+    return StreamingResponse(
+        res.aiter_raw(),
+        status_code=res.status_code,
+        headers={
+            "Content-Type": res.headers.get("Content-Type", "video/mp4"),
+            "Content-Length": res.headers.get("Content-Length", ""),
+        },
+        background=client.aclose
+    )  
